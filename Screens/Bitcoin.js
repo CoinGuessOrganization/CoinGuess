@@ -156,81 +156,82 @@ export default function AApp() {
             type="solid"
           />
         </View>
-        <View  style={{flexDirection:"row",paddingTop:"2.5%",justifyContent:"space-evenly"}}>
         { ((dayColor  != primary) || (weekColor  != primary) || (monthColor  != primary )) &&
-            <View style={{flexDirection:"row",justifyContent:"space-between"}}>
-              <Input
-                containerStyle={{
-                  width:"40%",
-                  overflow:"visible",
-                  borderWidth:1,
-                  borderRadius:16,
-                  borderColor:primary
+          <View>
+            <View  style={{flexDirection:"row",paddingTop:"1.5%",justifyContent:"space-evenly"}}>
+                  <Input
+                    containerStyle={{
+                      width:"40%",
+                      overflow:"visible",
+                      borderWidth:1,
+                      borderRadius:16,
+                      borderColor:primary
+                    }}
+                    inputStyle={{
+                      color:"black",
+                    }}
+                    inputContainerStyle={{
+                      borderBottomWidth:0,
+                    }}
+                    label=" "
+                    placeholder="Mevcut Değer"
+                    placeholderTextColor={primary}
+                    numeric
+                    keyboardType={'numeric'}
+                    onChangeText={value => Guess(value)}
+                  />
+                  <View style={styles.GuessStyle}>
+                    <Text style={{color:guessColor, fontSize:15, paddingLeft:15}}>{guess}</Text>
+                  </View>
+            </View>  
+            <LineChart
+              data={{
+                labels: ["January", "February", "March", "April", "May", "June"],
+                datasets: [
+                  {
+                    data: [
+                      Math.random() * 100,
+                      Math.random() * 100,
+                      Math.random() * 100,
+                      Math.random() * 100,
+                      Math.random() * 100,
+                      Math.random() * 100
+                    ]
+                  }
+                  ]
                 }}
-                inputStyle={{
-                  color:"black",
-                }}
-                inputContainerStyle={{
-                  borderBottomWidth:0,
-                }}
-                placeholder="Yatırılacak/Elde olan Para"
-                placeholderTextColor={primary}
-                numeric
-                keyboardType={'numeric'}
-                onChangeText={value => Guess(value)}
-              />
-              <View style={styles.GuessStyle}>
-                <Text style={{color:guessColor, fontSize:15, paddingLeft:15}}>{guess}</Text>
-              </View>
-          </View>
-        }    
-        </View>
-        <LineChart
-          data={{
-            labels: ["January", "February", "March", "April", "May", "June"],
-            datasets: [
-              {
-                data: [
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100,
-                  Math.random() * 100
-                ]
-              }
-              ]
-            }}
-          width={Dimensions.get("window").width} // from react-native
-          height={220}
-          yAxisLabel="$"
-          yAxisSuffix="k"//y ekseninde değerin sonuna ekliyor
-          yAxisInterval={1} // optional, defaults to 1
-          
-          chartConfig={{
-            backgroundColor: "#e26a00",
-            backgroundGradientFrom: "#fb8c00",
-            backgroundGradientTo: "black",
-            decimalPlaces: 2, // optional, defaults to 2dp
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
-              borderRadius: 16,
-            },
-            propsForDots: {
-              r: "6",
-              strokeWidth: "2",
-              stroke: "#ffa726"
-            }
-          }}
-          bezier
-          style={{
-            marginVertical: 8,
-            borderRadius: 16,
-            paddingTop:10
-          }}
-        />
-        <Text style={{fontSize:15,paddingLeft:"40%"}}>Beklenen Grafik</Text>
+              width={Dimensions.get("window").width} // from react-native
+              height={220}
+              yAxisLabel="$"
+              yAxisSuffix="k"//y ekseninde değerin sonuna ekliyor
+              yAxisInterval={1} // optional, defaults to 1
+              
+              chartConfig={{
+                backgroundColor: "#e26a00",
+                backgroundGradientFrom: "#fb8c00",
+                backgroundGradientTo: "black",
+                decimalPlaces: 2, // optional, defaults to 2dp
+                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                style: {
+                  borderRadius: 16,
+                },
+                propsForDots: {
+                  r: "6",
+                  strokeWidth: "2",
+                  stroke: "#ffa726"
+                }
+              }}
+              bezier
+              style={{
+                marginVertical: 8,
+                borderRadius: 16,
+                paddingTop:10
+              }}
+            />
+            <Text style={{fontSize:15,paddingLeft:"40%"}}>Beklenen Grafik</Text>
+         </View>
+        }
       </View>
     </View>
     </ScrollView>
@@ -252,7 +253,8 @@ const styles = StyleSheet.create({
   container3: {
     flex: 6,
     alignSelf:"center",
-    paddingTop:"4%",
+    paddingTop:"1.5%",
+    width:"100%"
   },
   title:{
     alignItems: 'center',

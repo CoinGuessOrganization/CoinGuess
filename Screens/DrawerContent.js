@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react'
 import { View, StyleSheet, StatusBar } from 'react-native';
 import {
     useTheme,
@@ -20,7 +20,12 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export function DrawerContent(props) {
+    const [unit, setUnit] = useState("TRY");
 
+    const change = () => {
+        if(unit == "TRY" )setUnit("USD")
+        else setUnit("TRY")
+      }
     return(
         <View style={{flex:1, backgroundColor:"#dcdcdc"}}>
             <StatusBar barStyle="dark-content" backgroundColor="#dcdcdc"/>
@@ -81,8 +86,8 @@ export function DrawerContent(props) {
                         size={size}
                         />
                     )}
-                    label="USD - TRY " 
-                    onPress={() => {signOut()}}//değiştir
+                    label={unit}
+                    onPress={change}//değiştir
                 />
             </Drawer.Section>
         </View>
