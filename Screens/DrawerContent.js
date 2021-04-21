@@ -23,7 +23,7 @@ export function DrawerContent(props) {
 
     return(
         <View style={{flex:1, backgroundColor:"#dcdcdc"}}>
-            <StatusBar barStyle="light-content" backgroundColor="#dcdcdc"/>
+            <StatusBar barStyle="dark-content" backgroundColor="#dcdcdc"/>
             <DrawerContentScrollView {...props}>
                 <View style={styles.drawerContent}>
                     <View>
@@ -46,7 +46,7 @@ export function DrawerContent(props) {
                             )}
                             label="Bitcoin"
                             
-                            onPress={() => {props.navigation.navigate('A')}}
+                            onPress={() => {props.navigation.navigate('BTC')}}
                         />
                         <DrawerItem 
                             icon={({color, size}) => (
@@ -57,7 +57,7 @@ export function DrawerContent(props) {
                                 />
                             )}
                             label="Ethereum"
-                            onPress={() => {props.navigation.navigate('B')}}
+                            onPress={() => {props.navigation.navigate('ETH')}}
                         />
                         <DrawerItem 
                             icon={({color, size}) => (
@@ -67,7 +67,7 @@ export function DrawerContent(props) {
                                 />
                             )}
                             label="Ripple"
-                            onPress={() => {props.navigation.navigate('C')}}
+                            onPress={() => {props.navigation.navigate('XRP')}}
                         />
                     </Drawer.Section>
                 </View>

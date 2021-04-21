@@ -15,11 +15,15 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-41.0.0.tar.gz",
+    "react-native-chart-kit": "^6.11.0",
+    "react-native-elements": "^3.4.0",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-paper": "^4.7.2",
     "react-native-reanimated": "^2.1.0",
     "react-native-screens": "^3.1.1",
-    "react-native-web": "~0.13.12"
+    "react-native-svg": "^12.1.1",
+    "react-native-web": "~0.13.12",
+    "save": "^2.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"
