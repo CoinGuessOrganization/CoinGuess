@@ -9,7 +9,6 @@ import BTC from './Screens/Bitcoin';
 import ETH from './Screens/Ethereum';
 import XRP from './Screens/Ripple';
 
-
 const App = () => {
 
   const Drawer = createDrawerNavigator();

@@ -87,7 +87,7 @@ export function DrawerContent(props) {
                         />
                     )}
                     label={unit}
-                    onPress={change}//değiştir
+                    onPress={change}
                 />
             </Drawer.Section>
         </View>
