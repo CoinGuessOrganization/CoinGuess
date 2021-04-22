@@ -1,25 +1,25 @@
 import React from 'react';
+import {StatusBar } from 'react-native';
 import { NavigationContainer, } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import { DrawerContent } from './Screens/DrawerContent';
 
-import AApp from './Screens/a';
-import BApp from './Screens/b';
-import CApp from './Screens/c';
-
+import BTC from './Screens/Bitcoin';
+import ETH from './Screens/Ethereum';
+import XRP from './Screens/Ripple';
 
 const App = () => {
 
   const Drawer = createDrawerNavigator();
 
   return (
-
     <NavigationContainer>
+      <StatusBar barStyle="dark-content" backgroundColor="#dcdcdc"/>
         <Drawer.Navigator drawerContent={props => <DrawerContent {...props} />}>
-          <Drawer.Screen name="A" component={AApp} />
-          <Drawer.Screen name="B" component={BApp} />
-          <Drawer.Screen name="C" component={CApp} />
+          <Drawer.Screen name="BTC" component={BTC} />
+          <Drawer.Screen name="ETH" component={ETH} />
+          <Drawer.Screen name="XRP" component={XRP} />
         </Drawer.Navigator>
     </NavigationContainer>
 
