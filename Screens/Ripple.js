@@ -1,16 +1,11 @@
-import React, { useState } from 'react'
-import { StyleSheet, Text, View, Dimensions, SafeAreaView, StatusBar, TouchableOpacity } from 'react-native';
+import React, { useState,useEffect } from 'react'
+import { StyleSheet, Text, View, Dimensions, SafeAreaView, StatusBar, TouchableOpacity,
+  RefreshControl, ScrollView, ImageBackground} from 'react-native';
 import { Button, Input  } from 'react-native-elements';
-import { ScrollView } from 'react-native-gesture-handler';
-import {
-  LineChart,
-  BarChart,
-  PieChart,
-  ProgressChart,
-  ContributionGraph,
-  StackedBarChart
-} from "react-native-chart-kit";
+//import { ScrollView } from 'react-native-gesture-handler';
+import { LineChart } from "react-native-chart-kit";
 import { Entypo } from '@expo/vector-icons'; 
+import axios from 'axios';
 
 export default function AApp({navigation}) {
   const [primary]=useState("#a9a9a9")
@@ -22,6 +17,11 @@ export default function AApp({navigation}) {
 
   const [guess, setGuess] = useState("Seçlen periyot sonunda öngörülen yeni değer")
   const [guessColor, setGuessColor] = useState(primary)
+
+
+  const [predicts, setPredicts] = useState({});
+  const [historicalData, setHistoricalData] = useState({});
+  const [dates, setDates] = useState({});
 
   const pressDay = () => {
     if(dayColor == secondary)setDay(primary)
@@ -54,18 +54,96 @@ export default function AApp({navigation}) {
       setGuessColor(primary)
     }
     else{
-      setGuess(value*10)
+      var res = value/predicts[0];
+
+      var predictOfPeriod = predicts[3];
+
+      if(weekColor == secondary){
+
+        predictOfPeriod = predicts[7];
+
+      }else if(monthColor == secondary){
+
+        predictOfPeriod = predicts[30];
+      }
+
+      setGuess((res*predictOfPeriod).toFixed(2))
       setGuessColor("black")
     }
   }
+  
+  useEffect(() => {
+    var predictsArray = [];
+    var historicalArray = [];
+    var datesArray = [];
+
+    getServiceData(function(result){
+
+      result["predicts"].forEach(element => {
+        predictsArray.push(element);          
+      });
+
+      result["historicalData"].forEach(element => {
+        historicalArray.push(element);          
+      });
+      
+      result["dates"].forEach(element => {
+        datesArray.push(element);          
+      });
+
+      setDates(datesArray);
+      setHistoricalData(historicalArray);
+      setPredicts(predictsArray);
+    });   
+  },[])
+
+
+  function getServiceData(callback){
+    setRefreshing(true);
+    axios.get(`http://192.168.1.105:5821/flaskweb/api/XRP`)
+
+    .then(res => {
+
+      callback(res["data"]);
+      wait(2000).then(() => setRefreshing(false));
+    }).catch(error => console.error(error));
+    
+  }
+  const wait = (timeout) => {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+  }
+
+  const [refreshing, setRefreshing] = React.useState(true);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    wait(1000).then(() => setRefreshing(false));
+  }, []);
+
+
+  function dateLabel(days){
+    var date = new Date();
+    date.setDate(date.getDate() + days);
+    date = date.toISOString();
+    date = date.slice(5,10);
+    return date;
+  }  
   return (
   <SafeAreaView style={{flex:1,backgroundColor:"#dcdcdc"}}>
-    <StatusBar barStyle="dark-content" backgroundColor="#dcdcdc"/>
-    <ScrollView>
-
+    <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+      >
+    <StatusBar barStyle="dark-content" backgroundColor="#dcdcdc" hidden/>
+    {!refreshing &&
       <View style={{flex:1,backgroundColor:"#dcdcdc"}}>
         <View style={styles.container}>
-        <TouchableOpacity
+          <TouchableOpacity
             onPress={()=> navigation.openDrawer()}
           >
             <Entypo 
@@ -79,29 +157,28 @@ export default function AApp({navigation}) {
 
 
         <View style={styles.container2}>
-          <Text style={styles.actual}>Güncel Değer : </Text>
+          <Text style={styles.actual}>Güncel Değer : {predicts[0].toFixed(2)} $ </Text>
           <LineChart
             data={{
-              labels: ["January", "February", "March", "April", "May", "June"],
+              labels: [ dates[0].slice(5,10), " ", " ", " ", " ", " ",
+                        dates[6].slice(5,10), " ", " ", " ", " ", " ",
+                        dates[12].slice(5,10), " ", " ", " ", " ", " ",
+                        dates[18].slice(5,10), " ", " ", " ", " ", " ",
+                        dates[24].slice(5,10), " ", " ", " ", " ", 
+                        dates[29].slice(5,10)
+
+            ],
               datasets: [
                 {
-                  data: [
-                    Math.random() * 100,
-                    Math.random() * 100,
-                    Math.random() * 100,
-                    Math.random() * 100,
-                    Math.random() * 100,
-                    Math.random() * 100
-                  ]
+                  data: historicalData
                 }
                 ]
               }}
             width={Dimensions.get("window").width} // from react-native
-            height={220}
-            yAxisLabel="$"
-            yAxisSuffix="k"//y ekseninde değerin sonuna ekliyor
+            height={330}
+            yAxisSuffix="$"//y ekseninde değerin sonuna ekliyor
             yAxisInterval={1} // optional, defaults to 1
-            
+            horizontalLabelRotation={315}
             chartConfig={{
               backgroundColor: "#e26a00",
               backgroundGradientFrom: "#00008b",
@@ -113,7 +190,7 @@ export default function AApp({navigation}) {
                 borderRadius: 16
               },
               propsForDots: {
-                r: "6",
+                r: "4",
                 strokeWidth: "2",
                 stroke: "#00008b"
               }
@@ -124,7 +201,7 @@ export default function AApp({navigation}) {
               borderRadius: 16
             }}
           />
-          <Text style={{fontSize:15,paddingLeft:"40%"}}>Güncel Grafik </Text>
+          <Text style={{fontSize:15,paddingLeft:"42%"}}>Güncel Grafik </Text>
         </View>
 
 
@@ -202,26 +279,25 @@ export default function AApp({navigation}) {
               </View>
               <LineChart
                 data={{
-                  labels: ["January", "February", "March", "April", "May", "June"],
+                  labels: [dateLabel(1), " ", " ", " ", " ", " ",
+                          dateLabel(7), " ", " ", " ", " ", " ",
+                          dateLabel(13), " ", " ", " ", " ", " ",
+                          dateLabel(19), " ", " ", " ", " ", " ",
+                          dateLabel(25), " ", " ", " ", " ", 
+                          dateLabel(31)
+    
+                ],
                   datasets: [
                     {
-                      data: [
-                        Math.random() * 100,
-                        Math.random() * 100,
-                        Math.random() * 100,
-                        Math.random() * 100,
-                        Math.random() * 100,
-                        Math.random() * 100
-                      ]
+                      data: predicts
                     }
                     ]
                   }}
                 width={Dimensions.get("window").width} // from react-native
-                height={220}
-                yAxisLabel="$"
-                yAxisSuffix="k"//y ekseninde değerin sonuna ekliyor
+                height={330}
+                yAxisSuffix="$"//y ekseninde değerin sonuna ekliyor
                 yAxisInterval={1} // optional, defaults to 1
-                
+                horizontalLabelRotation={315}
                 chartConfig={{
                   backgroundColor: "#e26a00",
                   backgroundGradientFrom: "#00008b",
@@ -233,7 +309,7 @@ export default function AApp({navigation}) {
                     borderRadius: 16,
                   },
                   propsForDots: {
-                    r: "6",
+                    r: "4",
                     strokeWidth: "2",
                     stroke: "#00008b"
                   }
@@ -245,11 +321,15 @@ export default function AApp({navigation}) {
                   paddingTop:10
                 }}
               />
-              <Text style={{fontSize:15,paddingLeft:"40%"}}>Beklenen Grafik</Text>
-            </View>
+              <Text style={{fontSize:15,paddingLeft:"42%"}}>Beklenen Grafik</Text>
+          </View>
           }
         </View>
       </View>
+      }
+      {refreshing &&
+        <ImageBackground source={require('../assets/3.png')} style={styles.loadingScreen}/>
+      }
     </ScrollView>
   </SafeAreaView>
   );
@@ -259,7 +339,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop:"4%",
-    flexDirection:"row"
+    flexDirection: "row",
+    justifyContent: "space-between"
   },
   container2:{
     flex:4,
@@ -275,7 +356,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     fontSize:30,
     fontWeight:'bold',
-    left:"320%"
+    right: Dimensions.get("window").width/2 - 37
   },
   actual:{
     paddingLeft:"2%",
@@ -294,5 +375,16 @@ const styles = StyleSheet.create({
     borderRadius:16,
     alignItems:"center",
     justifyContent:"center"
+  },
+  loadingTextColor:{
+    alignSelf:"center",
+    alignContent:"center",
+    justifyContent:"center",
+    color: "#e26a00",
+    fontWeight: "bold",
+    fontSize:15
+  },
+  loadingScreen:{
+    height:Dimensions.get("window").height,
   }
 });

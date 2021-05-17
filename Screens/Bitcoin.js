@@ -1,24 +1,15 @@
 import React, { useState,useEffect } from 'react'
 import { StyleSheet, Text, View, Dimensions, SafeAreaView, StatusBar, TouchableOpacity,
-  RefreshControl, ScrollView, } from 'react-native';
+  RefreshControl, ScrollView, ImageBackground} from 'react-native';
 import { Button, Input  } from 'react-native-elements';
-//import { ScrollView } from 'react-native-gesture-handler';
-import {
-  LineChart,
-  BarChart,
-  PieChart,
-  ProgressChart,
-  ContributionGraph,
-  StackedBarChart
-} from "react-native-chart-kit";
+import { LineChart } from "react-native-chart-kit";
 import { Entypo } from '@expo/vector-icons'; 
 import axios from 'axios';
-
 
 export default function AApp({navigation}) {
   const [primary]=useState("#a9a9a9")
   const [secondary]=useState("#d2691e")
-
+  const [back]=useState("#dcdcdc")
   const [dayColor, setDay] = useState(primary);
   const [weekColor, setWeek] = useState(primary);
   const [monthColor, setMonth] = useState(primary);
@@ -105,17 +96,13 @@ export default function AApp({navigation}) {
       setDates(datesArray);
       setHistoricalData(historicalArray);
       setPredicts(predictsArray);
-    });
-
-    
-    
-    
+    });   
   },[])
 
 
   function getServiceData(callback){
     setRefreshing(true);
-    axios.get(`http://192.168.56.1:5821/flaskweb/api/BTC`)
+    axios.get(`http://192.168.1.105:5821/flaskweb/api/BTC`)
 
     .then(res => {
 
@@ -145,7 +132,7 @@ export default function AApp({navigation}) {
   }
 
   return (
-  <SafeAreaView style={{flex:1,backgroundColor:"#dcdcdc"}}>
+  <SafeAreaView style={{flex:1,backgroundColor:back}}>
     <ScrollView
         contentContainerStyle={styles.scrollView}
         refreshControl={
@@ -155,12 +142,9 @@ export default function AApp({navigation}) {
           />
         }
       >
-    <StatusBar barStyle="dark-content" backgroundColor="#dcdcdc"/>
+    <StatusBar barStyle="dark-content" backgroundColor="#dcdcdc" hidden/>
     {!refreshing &&
-
-    
-
-      <View style={{flex:1,backgroundColor:"#dcdcdc"}}>
+      <View style={{flex:1,backgroundColor:"back"}}>
         <View style={styles.container}>
           <TouchableOpacity
             onPress={()=> navigation.openDrawer()}
@@ -180,10 +164,11 @@ export default function AApp({navigation}) {
           <LineChart
             data={{
               labels: [ dates[0].slice(5,10), " ", " ", " ", " ", " ",
-              dates[6].slice(5,10), " ", " ", " ", " ", " ",
-              dates[12].slice(5,10), " ", " ", " ", " ", " ",
-              dates[18].slice(5,10), " ", " ", " ", " ", " ",
-              dates[24].slice(5,10), " ", " ", " ", " ", dates[29].slice(5,10)
+                        dates[6].slice(5,10), " ", " ", " ", " ", " ",
+                        dates[12].slice(5,10), " ", " ", " ", " ", " ",
+                        dates[18].slice(5,10), " ", " ", " ", " ", " ",
+                        dates[24].slice(5,10), " ", " ", " ", " ", 
+                        dates[29].slice(5,10)
 
             ],
               datasets: [
@@ -193,7 +178,7 @@ export default function AApp({navigation}) {
                 ]
               }}
             width={Dimensions.get("window").width} // from react-native
-            height={220}
+            height={330}
             yAxisSuffix="$"//y ekseninde değerin sonuna ekliyor
             yAxisInterval={1} // optional, defaults to 1
             horizontalLabelRotation={315}
@@ -220,10 +205,8 @@ export default function AApp({navigation}) {
               borderRadius: 16
             }}
           />
-          <Text style={{fontSize:15,paddingLeft:"40%"}}>Güncel Grafik </Text>
+          <Text style={{fontSize:15,paddingLeft:"42%"}}>Güncel Grafik </Text>
         </View>
-
-
         <View style={styles.container3}>
           <View style={{alignItems:"center"}}>
             <Text style={styles.actual}>Öneri Alacağınız Periyodu Seçiniz</Text>
@@ -299,10 +282,11 @@ export default function AApp({navigation}) {
               <LineChart
                 data={{
                   labels: [dateLabel(1), " ", " ", " ", " ", " ",
-                  dateLabel(7), " ", " ", " ", " ", " ",
-                  dateLabel(13), " ", " ", " ", " ", " ",
-                  dateLabel(19), " ", " ", " ", " ", " ",
-                  dateLabel(25), " ", " ", " ", " ", dateLabel(31)
+                          dateLabel(7), " ", " ", " ", " ", " ",
+                          dateLabel(13), " ", " ", " ", " ", " ",
+                          dateLabel(19), " ", " ", " ", " ", " ",
+                          dateLabel(25), " ", " ", " ", " ", 
+                          dateLabel(31)
     
                 ],
                   datasets: [
@@ -312,7 +296,7 @@ export default function AApp({navigation}) {
                     ]
                   }}
                 width={Dimensions.get("window").width} // from react-native
-                height={220}
+                height={330}
                 yAxisSuffix="$"//y ekseninde değerin sonuna ekliyor
                 yAxisInterval={1} // optional, defaults to 1
                 horizontalLabelRotation={315}
@@ -339,16 +323,14 @@ export default function AApp({navigation}) {
                   paddingTop:10
                 }}
               />
-              <Text style={{fontSize:15,paddingLeft:"40%"}}>Beklenen Grafik</Text>
+              <Text style={{fontSize:15,paddingLeft:"42%"}}>Beklenen Grafik</Text>
           </View>
           }
         </View>
       </View>
       }
       {refreshing &&
-
-        <Text>Data loading</Text>
-
+        <ImageBackground source={require('../assets/3.png')} style={styles.loadingScreen}/>
       }
     </ScrollView>
   </SafeAreaView>
@@ -359,7 +341,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop:"4%",
-    flexDirection:"row",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   container2:{
     flex:4,
@@ -375,7 +358,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     fontSize:30,
     fontWeight:'bold',
-    left: "310%",
+    right: Dimensions.get("window").width/2 - 37,
   },
   actual:{
     paddingLeft:"2%",
@@ -394,5 +377,16 @@ const styles = StyleSheet.create({
     borderRadius:16,
     alignItems:"center",
     justifyContent:"center"
+  },
+  loadingTextColor:{
+    alignSelf:"center",
+    alignContent:"center",
+    justifyContent:"center",
+    color: "#e26a00",
+    fontWeight: "bold",
+    fontSize:15
+  },
+  loadingScreen:{
+    height:Dimensions.get("window").height,
   }
 });
