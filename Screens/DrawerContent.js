@@ -20,7 +20,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export function DrawerContent(props) {
-    const [unit, setUnit] = useState("TRY");
+    const [unit, setUnit] = useState("USD");
 
     const change = () => {
         if(unit == "TRY" )setUnit("USD")
