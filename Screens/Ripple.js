@@ -1,106 +1,113 @@
 import React, { useState,useEffect } from 'react'
 import { StyleSheet, Text, View, Dimensions, SafeAreaView, StatusBar, TouchableOpacity,
-  RefreshControl, ScrollView, ImageBackground} from 'react-native';
+  RefreshControl, ScrollView, ImageBackground } from 'react-native';
 import { Button, Input  } from 'react-native-elements';
-//import { ScrollView } from 'react-native-gesture-handler';
 import { LineChart } from "react-native-chart-kit";
 import { Entypo } from '@expo/vector-icons'; 
 import axios from 'axios';
 
-export default function AApp({navigation}) {
+export default function AApp(props) {
   const [primary]=useState("#a9a9a9")
   const [secondary]=useState("#00008b")
-
-  const [dayColor, setDay] = useState(primary);
-  const [weekColor, setWeek] = useState(primary);
-  const [monthColor, setMonth] = useState(primary);
-
-  const [guess, setGuess] = useState("Seçlen periyot sonunda öngörülen yeni değer")
-  const [guessColor, setGuessColor] = useState(primary)
-
-
+  
+  const [symbol, setSymbol] = useState("$")
+  const [unit, setUnit] = useState("USD");
+  const [dolarPrice, setDolarPrice] = useState("2");
+  const [advise, setadvise] = useState(null)
+  
   const [predicts, setPredicts] = useState({});
+  const [predictsTRY, setPredictsTRY] = useState({});
+  const [predictsUSD, setPredictsUSD] = useState({});
+
   const [historicalData, setHistoricalData] = useState({});
+  const [historicalDataTRY, setHistoricalDataTRY] = useState({});
+  const [historicalDataUSD, setHistoricalDataUSD] = useState({});
+
   const [dates, setDates] = useState({});
 
-  const pressDay = () => {
-    if(dayColor == secondary)setDay(primary)
-    else{
-      setDay(secondary)
-      setWeek(primary)
-      setMonth(primary)
-    }
-  }
-  const pressWeek = () => {
-    if(weekColor == secondary)setWeek(primary)
-    else{
-      setDay(primary)
-      setWeek(secondary)
-      setMonth(primary)
-    }
-  }
-  const pressMounth = () => {
-    if(monthColor == secondary)setMonth(primary)
-    else{
-      setDay(primary)
-      setWeek(primary)
-      setMonth(secondary)
-    }
-  }
-
-  const Guess = (value) =>{
-    if(value==0){
-      setGuess("Seçlen periyot sonunda öngörülen yeni değer")
-      setGuessColor(primary)
-    }
-    else{
-      var res = value/predicts[0];
-
-      var predictOfPeriod = predicts[3];
-
-      if(weekColor == secondary){
-
-        predictOfPeriod = predicts[7];
-
-      }else if(monthColor == secondary){
-
-        predictOfPeriod = predicts[30];
-      }
-
-      setGuess((res*predictOfPeriod).toFixed(2))
-      setGuessColor("black")
-    }
-  }
-  
   useEffect(() => {
-    var predictsArray = [];
-    var historicalArray = [];
+    var predictsArrayUSD = [];
+    var historicalArrayUSD = [];
     var datesArray = [];
 
     getServiceData(function(result){
 
       result["predicts"].forEach(element => {
-        predictsArray.push(element);          
+        predictsArrayUSD.push(element);       
       });
 
       result["historicalData"].forEach(element => {
-        historicalArray.push(element);          
+        historicalArrayUSD.push(element);
       });
-      
+
       result["dates"].forEach(element => {
         datesArray.push(element);          
       });
 
       setDates(datesArray);
-      setHistoricalData(historicalArray);
-      setPredicts(predictsArray);
-    });   
+      setHistoricalDataUSD(historicalArrayUSD);
+      setPredictsUSD(predictsArrayUSD);
+
+      if(props.route.params==undefined){
+        setHistoricalData(historicalArrayUSD);
+        setPredicts(predictsArrayUSD);
+        setSymbol("$");
+      }
+      else{
+        setHistoricalData(historicalDataTRY);
+        setPredicts(predictsTRY);
+        setSymbol("₺");
+      }
+
+      if(predictsArrayUSD[0] > predictsArrayUSD[1]){
+        setadvise("Elinizde bulunan kripto parayı satın, yeni alım yapmayın.")
+      }
+      else{
+        setadvise("Elinizde bulunan kripto parayı bekletin, yeni alım yapabilirsiniz.")
+      }
+    });
   },[])
 
+  useEffect(()=>{
+    if((props.route.params!=undefined)&&(props.route.params.unit!=unit)){
+        setUnit(props.route.params.unit)
+        if(unit=="USD"){
+          setHistoricalData(historicalDataTRY);
+          setPredicts(predictsTRY);
+          setSymbol("₺");
+        }
+        else{
+          setHistoricalData(historicalDataUSD);
+          setPredicts(predictsUSD);
+          setSymbol("$");
+        }
+    }
+    if((props.route.params!=undefined)&&(props.route.params.dolarPrice!=dolarPrice)){
+        setDolarPrice(props.route.params.dolarPrice)
+        var predictsArrayTRY = [];
+        var historicalArrayTRY = [];
+
+        getServiceData(function(result){
+          result["predicts"].forEach(element => {
+            predictsArrayTRY.push(element*props.route.params.dolarPrice);          
+          });
+    
+          result["historicalData"].forEach(element => {
+            historicalArrayTRY.push(element*props.route.params.dolarPrice);
+          });
+
+          setHistoricalData(historicalArrayTRY);
+          setPredicts(predictsArrayTRY);
+
+          setHistoricalDataTRY(historicalArrayTRY);
+          setPredictsTRY(predictsArrayTRY);
+        }); 
+    }
+  })
 
   function getServiceData(callback){
     setRefreshing(true);
-    axios.get(`http://192.168.1.105:5821/flaskweb/api/XRP`)
+    axios.get(`http://192.168.1.4:5821/flaskweb/api/XRP`)
 
     .then(res => {
 
@@ -124,10 +131,9 @@ export default function AApp({navigation}) {
   function dateLabel(days){
     var date = new Date();
     date.setDate(date.getDate() + days);
-    date = date.toISOString();
-    date = date.slice(5,10);
+    date = date.toLocaleDateString();
     return date;
-  }  
+  }
   return (
   <SafeAreaView style={{flex:1,backgroundColor:"#dcdcdc"}}>
     <ScrollView
@@ -144,7 +150,7 @@ export default function AApp({navigation}) {
       <View style={{flex:1,backgroundColor:"#dcdcdc"}}>
         <View style={styles.container}>
           <TouchableOpacity
-            onPress={()=> navigation.openDrawer()}
+            onPress={()=> props.navigation.openDrawer()}
           >
             <Entypo 
               name="menu" 
@@ -157,7 +163,7 @@ export default function AApp({navigation}) {
 
 
         <View style={styles.container2}>
-          <Text style={styles.actual}>Güncel Değer : {predicts[0].toFixed(2)} $ </Text>
+          <Text style={styles.actual}>Güncel Değer : {predicts[0].toFixed(2)} {symbol} </Text>
           <LineChart
             data={{
               labels: [ dates[0].slice(5,10), " ", " ", " ", " ", " ",
@@ -175,8 +181,8 @@ export default function AApp({navigation}) {
                 ]
               }}
             width={Dimensions.get("window").width} // from react-native
-            height={330}
-            yAxisSuffix="$"//y ekseninde değerin sonuna ekliyor
+            height={350}
+            yAxisSuffix={symbol}//y ekseninde değerin sonuna ekliyor
             yAxisInterval={1} // optional, defaults to 1
             horizontalLabelRotation={315}
             chartConfig={{
@@ -206,124 +212,54 @@ export default function AApp({navigation}) {
 
 
         <View style={styles.container3}>
-          <View style={{alignItems:"center"}}>
-            <Text style={styles.actual}>Öneri Alacağınız Periyodu Seçiniz</Text>
+          <View style={styles.adviseStyle}>
+                  <Text style={{color:"black", fontSize:20, paddingLeft:15}}>{advise}</Text>
           </View>
-          <View style={styles.ButtonGroup}>
-            <Button
-              buttonStyle={{
-                borderRadius:16,
-                backgroundColor:dayColor,
-              }}
-              titleStyle={{
-                color:"#f0fff0"
-              }}
-              onPress={pressDay}
-              title="3 Gün"
-              type="solid"
-            />
-            <Button
-              buttonStyle={{
-                borderRadius:16,
-                backgroundColor:weekColor,
-              }}
-              titleStyle={{
-                color:"#f0fff0"
-              }}
-              onPress={pressWeek}
-              title="1 Hafta"
-              type="solid"
-            />  
-            <Button
-              buttonStyle={{
-                borderRadius:16,
-                backgroundColor:monthColor,
-              }}
-              titleStyle={{
-                color:"#f0fff0"
-              }}
-              onPress={pressMounth}
-              title="1 Ay"
-              type="solid"
-            />
-          </View>
+          <LineChart
+            data={{
+              labels: [dateLabel(1), " ", " ", " ", " ",
+                      dateLabel(6), " ", " ", " ", " ", " ",
+                      dateLabel(12), " ", " ", " ", " ", " ",
+                      dateLabel(18), " ", " ", " ", " ", " ",
+                      dateLabel(24), " ", " ", " ", " ", " ",
+                      dateLabel(30)
 
-
-          { ((dayColor  != primary) || (weekColor  != primary) || (monthColor  != primary )) &&
-            <View>
-              <View  style={{flexDirection:"row",paddingTop:"1.5%",justifyContent:"space-evenly"}}>
-                    <Input
-                      containerStyle={{
-                        width:"40%",
-                        overflow:"visible",
-                        borderWidth:1,
-                        borderRadius:16,
-                        borderColor:primary,
-                      }}
-                      inputStyle={{
-                        color:"black",
-                      }}
-                      inputContainerStyle={{
-                        borderBottomWidth:0,
-                      }}
-                      label=" "
-                      placeholder="Mevcut değer"
-                      placeholderTextColor={primary}
-                      numeric
-                      keyboardType={'numeric'}
-                      onChangeText={value => Guess(value)}
-                    />
-                    <View style={styles.GuessStyle}>
-                      <Text style={{color:guessColor, fontSize:15, paddingLeft:15}}>{guess}</Text>
-                    </View> 
-              </View>
-              <LineChart
-                data={{
-                  labels: [dateLabel(1), " ", " ", " ", " ", " ",
-                          dateLabel(7), " ", " ", " ", " ", " ",
-                          dateLabel(13), " ", " ", " ", " ", " ",
-                          dateLabel(19), " ", " ", " ", " ", " ",
-                          dateLabel(25), " ", " ", " ", " ", 
-                          dateLabel(31)
-    
-                ],
-                  datasets: [
-                    {
-                      data: predicts
-                    }
-                    ]
-                  }}
-                width={Dimensions.get("window").width} // from react-native
-                height={330}
-                yAxisSuffix="$"//y ekseninde değerin sonuna ekliyor
-                yAxisInterval={1} // optional, defaults to 1
-                horizontalLabelRotation={315}
-                chartConfig={{
-                  backgroundColor: "#e26a00",
-                  backgroundGradientFrom: "#00008b",
-                  backgroundGradientTo: "black",
-                  decimalPlaces: 2, // optional, defaults to 2dp
-                  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                  style: {
-                    borderRadius: 16,
-                  },
-                  propsForDots: {
-                    r: "4",
-                    strokeWidth: "2",
-                    stroke: "#00008b"
-                  }
-                }}
-                bezier
-                style={{
-                  marginVertical: 8,
-                  borderRadius: 16,
-                  paddingTop:10
-                }}
-              />
-              <Text style={{fontSize:15,paddingLeft:"42%"}}>Beklenen Grafik</Text>
-          </View>
-          }
+            ],
+              datasets: [
+                {
+                  data: predicts
+                }
+                ]
+              }}
+            width={Dimensions.get("window").width} // from react-native
+            height={350}
+            yAxisSuffix={symbol}//y ekseninde değerin sonuna ekliyor
+            yAxisInterval={1} // optional, defaults to 1
+            horizontalLabelRotation={315}
+            chartConfig={{
+              backgroundColor: "#e26a00",
+              backgroundGradientFrom: "#00008b",
+              backgroundGradientTo: "black",
+              decimalPlaces: 2, // optional, defaults to 2dp
+              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              style: {
+                borderRadius: 16,
+              },
+              propsForDots: {
+                r: "4",
+                strokeWidth: "2",
+                stroke: "#00008b"
+              }
+            }}
+            bezier
+            style={{
+              marginVertical: 8,
+              borderRadius: 16,
+              paddingTop:10
+            }}
+          />
+          <Text style={{fontSize:15,paddingLeft:"42%"}}>Beklenen Grafik</Text>
         </View>
       </View>
       }
@@ -375,6 +311,13 @@ const styles = StyleSheet.create({
     borderRadius:16,
     alignItems:"center",
     justifyContent:"center"
+  },
+  adviseStyle:{
+    borderColor:"#a9a9a9",
+    borderRadius:16,
+    alignItems:"center",
+    justifyContent:"center",
+    height:Dimensions.get("window").height/7,
   },
   loadingTextColor:{
     alignSelf:"center",

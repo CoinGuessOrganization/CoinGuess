@@ -10,6 +10,7 @@
   "dependencies": {
     "@react-navigation/drawer": "^5.12.5",
     "@react-navigation/native": "^5.9.4",
+    "axios": "^0.21.1",
     "expo": "~41.0.0",
     "expo-status-bar": "~1.0.4",
     "react": "16.13.1",
@@ -22,6 +23,7 @@
     "react-native-reanimated": "^2.1.0",
     "react-native-screens": "^3.1.1",
     "react-native-svg": "^12.1.1",
+    "react-native-video": "^5.1.1",
     "react-native-web": "~0.13.12",
     "save": "^2.4.0"
   },

@@ -1,20 +1,29 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 import { View, StyleSheet, StatusBar } from 'react-native';
 import { Avatar, Drawer} from 'react-native-paper';
 import {
     DrawerContentScrollView,
     DrawerItem
 } from '@react-navigation/drawer';
+import axios from 'axios';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export function DrawerContent(props) {
     const [unit, setUnit] = useState("USD");
+    const [dolarPrice, setDolarPrice] = useState("10");
 
     const change = () => {
         if(unit == "TRY" )setUnit("USD")
         else setUnit("TRY")
       }
+
+    useEffect(()=>{
+        axios.get(`https://api.genelpara.com/embed/doviz.json`)
+        .then(res => {
+            setDolarPrice(res["data"].USD.satis);
+        }).catch(error => console.error(error));
+    },[])
     return(
         <View style={{flex:1, backgroundColor:"#dcdcdc"}}>
             <StatusBar barStyle="dark-content" backgroundColor="#dcdcdc"/>
@@ -40,7 +49,7 @@ export function DrawerContent(props) {
                             )}
                             label="Bitcoin"
                             
-                            onPress={() => {props.navigation.navigate('BTC')}}
+                            onPress={() => props.navigation.navigate('BTC',{unit:unit,dolarPrice:dolarPrice})}
                         />
                         <DrawerItem 
                             icon={({color, size}) => (
@@ -51,7 +60,7 @@ export function DrawerContent(props) {
                                 />
                             )}
                             label="Ethereum"
-                            onPress={() => {props.navigation.navigate('ETH')}}
+                            onPress={() => props.navigation.navigate('ETH',{unit:unit,dolarPrice:dolarPrice})}
                         />
                         <DrawerItem 
                             icon={({color, size}) => (
@@ -61,7 +70,7 @@ export function DrawerContent(props) {
                                 />
                             )}
                             label="Ripple"
-                            onPress={() => {props.navigation.navigate('XRP')}}
+                            onPress={() => props.navigation.navigate('XRP',{unit:unit,dolarPrice:dolarPrice})}
                         />
                     </Drawer.Section>
                 </View>
